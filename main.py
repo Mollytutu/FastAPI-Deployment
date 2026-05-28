@@ -40,21 +40,8 @@ templates = Jinja2Templates(directory=settings.templates_dir)
 app.include_router(users.router)
 app.include_router(posts.router)
 
-@app.get("/",include_in_schema=False, name="home")
+@app.get("/", include_in_schema=False, name="home")
 @app.get("/posts", include_in_schema=False, name="posts")
-
-# check database connection, if connection is successful return healthy status, if not return 503 error
-@app.get("/health")
-async def health_check(db: Annotated[AsyncSession, Depends(get_db)]):
-    try:
-        await db.execute(text("SELECT 1"))
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database unavailable",
-        ) from exc
-    return {"status": "healthy"}
-
 async def home(request: Request, db:Annotated[AsyncSession, Depends(get_db)]):
     count_result = await db.execute(select(func.count()).select_from(models.Post))
     total = count_result.scalar() or 0
@@ -77,8 +64,20 @@ async def home(request: Request, db:Annotated[AsyncSession, Depends(get_db)]):
 	         "title": "Home",
 	         "limit": settings.posts_per_page,
 	         "has_more": has_more,
-	        }
+        }
     )
+
+# check database connection, if connection is successful return healthy status, if not return 503 error
+@app.get("/health")
+async def health_check(db: Annotated[AsyncSession, Depends(get_db)]):
+    try:
+        await db.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
+    return {"status": "healthy"}
 
 # get post by id, if post exists return post, if not raise 404 error
 @app.get("/posts/{post_id}", include_in_schema=False, name="post_page")
