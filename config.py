@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     algorithm:str = "HS256"
     access_token_expire_minutes: int=30
     s3_bucket_name: str | None = None
-    s3_region: str = "us-east-1"
     max_upload_size_bytes: int = 5 * 1024 * 1024
     posts_per_page:int = 10
     reset_token_expire_minutes: int = 60
@@ -27,6 +26,13 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:8000"
 
     database_url: str
+    
+    # S3 Configuration. it's |none when inside aws ecosystem, otherwise it should be set in .env
+
+    s3_region: str = "us-east-2"
+    s3_access_key_id: SecretStr | None = None
+    s3_secret_access_key: SecretStr | None = None
+    s3_endpoint_url: str | None = None
     
     @field_validator("debug", mode="before")
     @classmethod

@@ -13,7 +13,7 @@ from schemas import PostCreate, PostResponse, PostUpdate, PaginatedPostsResponse
 router = APIRouter(prefix="/api/posts", tags=["posts"])
 
 
-@router.get("/", response_model=PaginatedPostsResponse)
+@router.get("", response_model=PaginatedPostsResponse)
 async def get_posts(
     db: Annotated[AsyncSession,Depends(get_db)],
     skip: Annotated[int, Query(ge=0)] = 0,
@@ -122,7 +122,7 @@ async def update_post_partial(
         
         
 @router.post(
-    "/", 
+    "", 
     response_model=PostResponse, 
     status_code=status.HTTP_201_CREATED
 )
