@@ -300,14 +300,11 @@
         if (!token) {
             window.location.href = "{{ url_for('login_page') }}";
             return;
+        }
 
         // Gather form values into a plain object {title: "...", content: "..."}
         const formData = new FormData(createForm);
         const postData = Object.fromEntries(formData.entries());
-
-        // TEMPORARY - hardcoded until authorization (Tutorial 11)
-        postData.user_id = 1;
-        postData.author = "Corey Schafer";
 
         try {
           // POST to our API as JSON
@@ -355,8 +352,9 @@
             showModal("errorModal");
           }
         } catch (error) {
+          console.error("Create post fetch failed:", error);
           document.getElementById("errorMessage").textContent =
-            "Network error. Please check your connection and try again.";
+            `Network error: ${error.message}`;
 
           hideModal("createPostModal");
           showModal("errorModal");
