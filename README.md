@@ -1,6 +1,6 @@
 # FastAPI Blog - Full-Stack Deployed Web App
 
-[Live Application](http://172.238.168.32)  
+[Live Application](http://172.238.168.32) - available until July 15, 2026 while my larger AI application is being completed  
 [GitHub Repository](https://github.com/Mollytutu/FastAPI-Deployment)
 
 A production-minded full-stack blog application built with FastAPI. It includes server-rendered pages, REST API endpoints, user authentication, profile image uploads, password reset emails, database migrations, tests, Docker support, and VPS deployment notes.
@@ -199,7 +199,7 @@ docker run --env-file .env -p 8080:8080 fastapi-blog
 
 ## Deployment
 
-The project is currently deployed online at:
+The project is currently deployed online and will remain available until July 15, 2026 while my larger AI application is being completed:
 
 ```text
 http://172.238.168.32
