@@ -10,7 +10,7 @@ async def send_email(
     to_email:str,
     subject:str,
     plain_text:str,
-    htmal_content:str | None = None,
+    html_content:str | None = None,
 )->None:
     message = EmailMessage()
     message["From"] = settings.mail_from
@@ -18,8 +18,8 @@ async def send_email(
     message["Subject"] = subject
     message.set_content(plain_text)
     
-    if htmal_content:
-        message.add_alternative(htmal_content, subtype="html")
+    if html_content:
+        message.add_alternative(html_content, subtype="html")
     
     await aiosmtplib.send(
         message,

@@ -47,10 +47,9 @@ from schemas import (
     UserPrivate,
     UserPublic,
     UserUpdate,
-    PagenatedUsersResponse
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/api/users", tags=["users"])
 
 
 @router.post(

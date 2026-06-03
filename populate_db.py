@@ -302,6 +302,8 @@ async def populate() -> None:
         await clear_existing_data()
 
         users: list[dict] = []
+        uploaded_images = 0
+        missing_images: list[str] = []
 
         print(f"\nCreating {len(USERS)} users...")
         for user_data in USERS:
@@ -342,7 +344,11 @@ async def populate() -> None:
                         headers={"Authorization": f"Bearer {token}"},
                     )
                     response.raise_for_status()
+                    uploaded_images += 1
                     print(f"    Uploaded: {image_name}")
+                else:
+                    missing_images.append(str(image_path))
+                    print(f"    Missing image: {image_path}")
 
             users.append(
                 {"id": user["id"], "username": user["username"], "token": token},
@@ -386,7 +392,11 @@ async def populate() -> None:
     print("\nDone!")
     print(f"  {len(USERS)} users")
     print(f"  {len(POSTS) + 1} posts")
-    print("  Profile pictures uploaded to S3")
+    print(f"  {uploaded_images} profile pictures uploaded to S3")
+    if missing_images:
+        print("  Missing profile image files:")
+        for image_path in missing_images:
+            print(f"    {image_path}")
 
 
 if __name__ == "__main__":
