@@ -1,167 +1,223 @@
-# FastAPI Application
+# FastAPI Blog - Full-Stack Deployed Web App
 
-[![GitHub Repo](https://img.shields.io/badge/GitHub-FastAPI--Deployment-blue?logo=github)](https://github.com/Mollytutu/FastAPI-Deployment)  
-[Live preview](http://172.238.168.32) available temporarily while the application is being finalized.
+[Live Application](http://172.238.168.32)  
+[GitHub Repository](https://github.com/Mollytutu/FastAPI-Deployment)
 
-A full-stack blog application built with FastAPI, SQLAlchemy, Jinja2 templates, JWT authentication, password reset email support, and optional AWS S3 profile image uploads.
+A production-minded full-stack blog application built with FastAPI. It includes server-rendered pages, REST API endpoints, user authentication, profile image uploads, password reset emails, database migrations, tests, Docker support, and VPS deployment notes.
 
-This repository is published at `https://github.com/Mollytutu/FastAPI-Deployment`.
+This project demonstrates the full path from application code to a deployed web app: backend architecture, database modeling, frontend templates, authentication, file handling, testing, containerization, and Linux server deployment.
 
-This project demonstrates end-to-end web application skills, including backend API design, frontend templating, database modeling, authentication, file upload handling, security hardening, testing, and deployment preparation.
+## What I Built
 
-## Key Features
-
-- Full-stack blog experience with server-rendered pages and a JSON API
-- JWT-based authentication for protected endpoints
-- User registration, login, account profile, and password reset flows
-- Secure password hashing and reset-token management
-- Async SQLAlchemy with PostgreSQL / SQLite support
-- Image upload and profile picture handling with optional AWS S3 integration
-- Pagination for post listings
-- Custom security headers and health check endpoint
+- Full-stack blog interface with HTML templates, CSS, and JavaScript
+- REST API for users, posts, authentication, profile pictures, and pagination
+- User registration, login, account management, and password changes
+- JWT authentication with protected routes
+- Secure password hashing with Argon2 through `pwdlib`
+- Password reset flow with expiring reset tokens and email delivery
+- Async database access with SQLAlchemy 2.x
+- Alembic migrations for schema changes
+- Profile picture processing with Pillow
+- Optional AWS S3 storage for uploaded profile images
+- Health check endpoint for deployment monitoring
+- HTTP security headers for production use
 - Automated tests for user and post workflows
-- VPS deployment notes included in `vps_setup.txt`
+- Dockerfile and VPS deployment notes for taking the app online
 
 ## Tech Stack
 
+**Backend**
+
 - Python 3.11+
 - FastAPI
-- SQLAlchemy 2.x (async)
-- Jinja2 templating
-- Pydantic / Pydantic Settings
-- PostgreSQL / SQLite
-- JWT (`pyjwt`)
-- SMTP email support
-- AWS S3 upload support via `boto3`
-- PyTest for tests
+- SQLAlchemy 2.x async ORM
+- Alembic
+- Pydantic and Pydantic Settings
+- PyJWT
+- Argon2 password hashing with `pwdlib`
+
+**Frontend**
+
+- Jinja2 templates
+- HTML
+- CSS
+- JavaScript
+- Static assets and web app icons
+
+**Database and Storage**
+
+- PostgreSQL for production
+- SQLite support for local development/testing
+- AWS S3 support with `boto3`
+- Pillow for image validation and resizing
+
+**Email and Auth**
+
+- OAuth2 password login flow
+- JWT bearer tokens
+- SMTP email support with `aiosmtplib`
+- Secure password reset tokens
+
+**Testing and Deployment**
+
+- Pytest
+- Moto for AWS-related tests
+- Docker
+- uv dependency management
+- Ubuntu VPS deployment
+- Nginx reverse proxy notes
+- systemd service notes
+- Health check endpoint at `/health`
 
 ## Project Structure
 
-- `main.py` - FastAPI application and page routes
-- `routers/` - API routers for posts and users
-- `models.py` - SQLAlchemy data models
-- `schemas.py` - Pydantic request/response models
-- `config.py` - application settings and environment loading
-- `database.py` - async database engine and session management
-- `auth.py` - authentication helpers and token utilities
-- `templates/` - HTML views for pages like login, register, home, posts
-- `static/` - CSS, JavaScript, icons, and profile picture assets
-- `tests/` - API and integration tests
-- `vps_setup.txt` - deployment and VPS hardening notes
-
-## Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-cd fastapi_project
+```text
+.
+├── main.py                 # FastAPI app, page routes, middleware, health check
+├── routers/                # API routers for users and posts
+├── models.py               # SQLAlchemy models
+├── schemas.py              # Pydantic request/response schemas
+├── database.py             # Async database engine and session setup
+├── auth.py                 # Password hashing, JWTs, current-user dependency
+├── config.py               # Environment-based app settings
+├── email_utils.py          # Password reset email delivery
+├── image_utils.py          # Profile image processing and upload helpers
+├── templates/              # Server-rendered HTML pages
+├── static/                 # CSS, JavaScript, icons, and images
+├── alembic/                # Database migrations
+├── tests/                  # User and post tests
+├── Dockerfile              # Production container build
+└── vps_setup.txt           # VPS deployment and hardening notes
 ```
 
-### 2. Create and activate a virtual environment
+## Core API Routes
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-```
+**Users**
 
-### 3. Install dependencies
+- `POST /api/users` - create a user
+- `POST /api/users/token` - log in and receive a JWT
+- `GET /api/users/me` - get the authenticated user
+- `PATCH /api/users/{user_id}` - update account information
+- `DELETE /api/users/{user_id}` - delete account
+- `PATCH /api/users/{user_id}/picture` - upload profile picture
+- `DELETE /api/users/{user_id}/picture` - remove profile picture
+- `POST /api/users/forgot-password` - request password reset email
+- `POST /api/users/reset-password` - reset password with token
+- `PATCH /api/users/me/password` - change password while logged in
 
-Install the main dependencies manually from the project requirements.
+**Posts**
 
-```bash
-python -m pip install fastapi[standard] aiosqlite alembic boto3 greenlet jinja2 pillow psycopg[binary] pwdlib[argon2] pydantic-settings pyjwt python-multipart sqlalchemy uvicorn
-```
+- `GET /api/posts` - list paginated posts
+- `GET /api/posts/{post_id}` - get one post
+- `POST /api/posts` - create a post
+- `PUT /api/posts/{post_id}` - replace a post
+- `PATCH /api/posts/{post_id}` - partially update a post
+- `DELETE /api/posts/{post_id}` - delete a post
 
-If you plan to run tests:
+**Pages**
 
-```bash
-python -m pip install pytest moto httpx
-```
+- `GET /` - home page
+- `GET /posts` - posts page
+- `GET /posts/{post_id}` - single post page
+- `GET /users/{user_id}/posts` - user posts page
+- `GET /login` - login page
+- `GET /register` - registration page
+- `GET /account` - account page
+- `GET /forgot-password` - forgot password page
+- `GET /reset-password` - reset password page
 
-### 4. Configure environment variables
+## Environment Variables
 
-Create a `.env` file in the project root with the required values.
-
-Example `.env`:
+Create a `.env` file in the project root for local development.
 
 ```env
-SECRET_KEY=your_secret_key
-DATABASE_URL=postgresql+psycopg://user:password@host/database
+SECRET_KEY=change_me
+DATABASE_URL=sqlite+aiosqlite:///./app.db
+
 MAIL_SERVER=smtp.example.com
 MAIL_PORT=587
-MAIL_USERNAME=your_email_username
-MAIL_PASSWORD=your_email_password
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
 MAIL_FROM=noreply@example.com
-MAIL_USE_TLS=True
+MAIL_USE_TLS=true
 FRONTEND_URL=http://localhost:8000
 
-# Optional AWS S3 configuration
-S3_BUCKET_NAME=your-bucket-name
+S3_BUCKET_NAME=
 S3_REGION=us-east-2
-S3_ACCESS_KEY_ID=your-access-key
-S3_SECRET_ACCESS_KEY=your-secret-key
+S3_ACCESS_KEY_ID=
+S3_SECRET_ACCESS_KEY=
 S3_ENDPOINT_URL=
 ```
 
-> Do not commit `.env` or any secret values to version control.
+Do not commit real secrets.
 
-### 5. Run the application
+## Run Locally
 
-```bash
-uvicorn main:app --reload
-```
-
-Then open `http://127.0.0.1:8000` in your browser.
-
-## API Endpoints
-
-### Users
-
-- `POST /api/users` - Register a new user
-- `POST /api/users/token` - Login and receive access token
-- `GET /api/users/me` - Get current authenticated user
-- `POST /api/users/forgot-password` - Send password reset email
-- `POST /api/users/reset-password` - Reset password with token
-
-### Posts
-
-- `GET /api/posts` - List paginated posts
-- `GET /api/posts/{post_id}` - Get a single post
-- `POST /api/posts` - Create a post (authenticated)
-- `PATCH /api/posts/{post_id}` - Update a post (authenticated, owner only)
-- `PUT /api/posts/{post_id}` - Replace a post (authenticated, owner only)
-- `DELETE /api/posts/{post_id}` - Delete a post (authenticated, owner only)
-
-### Health Check
-
-- `GET /health` - Application health status and database connectivity
-
-## Testing
-
-Run the test suite with:
+Install dependencies with `uv`:
 
 ```bash
-pytest
+uv sync
 ```
 
-## Deployment Notes
+Run migrations:
 
-- This project includes `vps_setup.txt` with a reproducible VPS setup workflow for Ubuntu 24.04
-- Temporary live preview is available at `http://172.238.168.32` while the application is being finalized
-- The application is designed to run behind a web server or reverse proxy and supports PostgreSQL and AWS S3
-- Security features include JWT authentication, secure password storage, and HTTP security headers
+```bash
+uv run alembic upgrade head
+```
 
-## Why This Project
+Start the application:
 
-This repository showcases real full-stack delivery skills:
+```bash
+uv run fastapi dev main.py
+```
 
-- backend architecture and API design
-- relational data modeling and async database access
-- user authentication and authorization
-- secure production-friendly configuration
-- front-end templating and UX flows
-- testing and deployment planning
+Open:
 
-If you want, I can also add a `.env.example` and a `requirements.txt` file to make setup even easier.
+```text
+http://127.0.0.1:8000
+```
+
+## Run Tests
+
+```bash
+uv run pytest
+```
+
+## Docker
+
+Build the image:
+
+```bash
+docker build -t fastapi-blog .
+```
+
+Run the container:
+
+```bash
+docker run --env-file .env -p 8080:8080 fastapi-blog
+```
+
+## Deployment
+
+The project is currently deployed online at:
+
+```text
+http://172.238.168.32
+```
+
+Deployment work covered in this repository includes:
+
+- Linux VPS setup
+- SSH hardening
+- UFW firewall configuration
+- Fail2Ban setup
+- Nginx reverse proxy planning
+- systemd service planning
+- production environment variables
+- PostgreSQL-ready database configuration
+- Docker production build
+- `/health` endpoint for service checks
+
+## Why This Project Matters
+
+This is not only a FastAPI API. It is a full-stack deployed application that shows I can build the backend, connect the database, create user-facing pages, handle authentication, process uploads, write tests, prepare production configuration, and get the project online.
